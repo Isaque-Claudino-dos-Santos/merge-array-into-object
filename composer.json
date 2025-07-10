@@ -1,6 +1,7 @@
 {
-  "name": "isq/merge-array-into-object",
+  "name": "isq/maio", 
   "license": "MIT",
+  "description": "A package to merge arrays into objects in PHP.",
   "autoload": {
     "psr-4": {
       "MergeArrayIntoObject\\": "src/"
