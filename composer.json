@@ -1,0 +1,13 @@
+{
+  "name": "isq/merge-array-into-object",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "MergeArrayIntoObject\\": "src/"
+    }
+  },
+  "require": {
+    "php": "^8.4",
+    "illuminate/support": "^12.20"
+  }
+}
