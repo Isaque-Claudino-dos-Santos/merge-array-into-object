@@ -1,11 +1,10 @@
 <?php
 
-namespace MergeArrayIntoObject;
+namespace MAIO;
 
 use Illuminate\Support\Arr;
-use MergeArrayIntoObject\Attributes\Call;
-use MergeArrayIntoObject\Attributes\Key;
-use MergeArrayIntoObject\Attributes\StaticCall;
+use MAIO\Attributes\Key;
+use MAIO\Attributes\StaticCall;
 use ReflectionObject;
 use ReflectionProperty;
 

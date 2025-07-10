@@ -1,6 +1,6 @@
 <?php
 
-namespace MergeArrayIntoObject\Attributes;
+namespace MAIO\Attributes;
 
 use Attribute;
 

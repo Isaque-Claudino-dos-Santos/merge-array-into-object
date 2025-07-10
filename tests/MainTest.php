@@ -2,10 +2,9 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-use MergeArrayIntoObject\Attributes\Call;
-use MergeArrayIntoObject\Attributes\Key;
-use MergeArrayIntoObject\Attributes\StaticCall;
-use MergeArrayIntoObject\MergeArrayIntoObject;
+use MAIO\Attributes\Key;
+use MAIO\Attributes\StaticCall;
+use MAIO\MergeArrayIntoObject;
 
 class User
 {
