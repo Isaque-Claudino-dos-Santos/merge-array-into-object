@@ -3,18 +3,20 @@
 namespace MAIO;
 
 use Illuminate\Support\Arr;
+use MAIO\Attributes\Call;
 use MAIO\Attributes\Key;
-use MAIO\Attributes\StaticCall;
-use MAIO\Exceptions\KeyInArrayNotFoundException;
+use MAIO\Exceptions\MethodNotExistsException;
 use ReflectionClass;
 use ReflectionProperty;
 
 class MergeArrayIntoObject
 {
 
-    private function handleProperty(object $target, ReflectionClass $targetReflection, ReflectionProperty $property, array $data): void
+    private function handleProperty(object $target, ReflectionProperty $property, array $data): void
     {
         $key = $property->getName();
+        $defaultValue = $property->hasDefaultValue() ? $property->getDefaultValue() : null;
+        $value = Arr::get($data, $key, $defaultValue);
 
         foreach ($property->getAttributes(Key::class) as $attribute) {
             $firstArg = $attribute->getArguments()[0];
@@ -24,29 +26,31 @@ class MergeArrayIntoObject
             }
 
             $key = $firstArg;
+            $value = Arr::get($data, $key, $defaultValue);
         }
 
-        foreach ($property->getAttributes(StaticCall::class) as $attribute) {
-            $methodName = $attribute->getArguments()[0];
+        foreach ($property->getAttributes(Call::class) as $attribute) {
+            $objectOrClass = $attribute->getArguments()[0];
+            $methodName = $attribute->getArguments()[1];
 
-            if (empty($methodName)) {
-                continue;
+            $isClass = class_exists($objectOrClass);
+            $isFunction = function_exists($objectOrClass);
+            $isObject = is_object($objectOrClass);
+
+            if ($isClass || $isObject) {
+                $reflection = new ReflectionClass($objectOrClass);
+
+                if (!$reflection->hasMethod($methodName)) {
+                    throw new MethodNotExistsException("Method static $methodName not found in $objectOrClass");
+                }
+
+                $method = $reflection->getMethod($methodName);
+                $value = $method->invoke($target, $value);
             }
 
-            if (!$targetReflection->hasMethod($methodName)) {
-                continue;
+            if ($isFunction) {
+                $value = $objectOrClass($value);
             }
-
-            $method = $targetReflection->getMethod($methodName);
-            $value = $method->invoke($target, Arr::get($data, $key));
-        }
-
-        if (!Arr::has($data, $key)) {
-            throw new KeyInArrayNotFoundException($key);
-        }
-
-        if (!isset($value)) {
-            $value = Arr::get($data, $key);
         }
 
         $property->setValue($target, $value);
@@ -67,7 +71,7 @@ class MergeArrayIntoObject
         $targetReflection = new ReflectionClass($target);
 
         foreach ($targetReflection->getProperties() as $property) {
-            $this->handleProperty($target, $targetReflection, $property, $data);
+            $this->handleProperty($target, $property, $data);
         }
 
         return $target;
