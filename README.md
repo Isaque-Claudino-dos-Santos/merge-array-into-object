@@ -94,7 +94,7 @@ class UserModel {
 
 class CreateUserDTO {
     #[Key('user_id')]
-    #[StaticCall('find')]
+    #[Call(UserModel::class, 'find')]
     public UserModel $user;
 }
 
