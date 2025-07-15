@@ -65,7 +65,6 @@ class MergeArrayIntoObjectTest extends TestCase
 
         $array = ['age' => 12];
 
-        $maio = new MergeArrayIntoObject();
-        $mergedObject = $maio->merge($object, $array);
+        (new MergeArrayIntoObject())->merge($object, $array);
     }
 }
