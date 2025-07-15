@@ -52,4 +52,19 @@ class MergeArrayIntoObjectTest extends TestCase
 
         $this->assertEquals('Marry Jane', $mergedObject->name);
     }
+
+    #[Test]
+    #[Ticket('#9')]
+    public function it_should_throw_key_in_array_not_found_on_set_define_key_not_existent_in_class_and_without_default_value_with_error()
+    {
+        $this->expectException(KeyInArrayNotFoundException::class);
+
+        $object = new class {
+            public string $name;
+        };
+
+        $array = ['age' => 12];
+
+        (new MergeArrayIntoObject())->merge($object, $array);
+    }
 }
