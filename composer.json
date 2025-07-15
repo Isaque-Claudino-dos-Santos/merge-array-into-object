@@ -4,7 +4,9 @@
   "description": "A package to merge arrays into objects in PHP.",
   "autoload": {
     "psr-4": {
-      "MAIO\\": "src/"
+      "MAIO\\Attributes\\": "src/Attributes/",
+      "MAIO\\Exceptions\\": "src/Exceptions/",
+      "MAIO\\": "src/MergeArrayIntoObject.php"
     }
   },
   "require": {
@@ -16,10 +18,8 @@
     "larapack/dd": "^1.1"
   },
   "config": {
-    "preferred-install": {
-      "src/Attributes/*": "dist",
-      "src/Exceptions/*": "dist",
-      "src/Exceptions/MergeArrayIntoObject.php": "dist"
-    }
+    "optimize-autoloader": true,
+    "preferred-install": "dist",
+    "sort-packages": true
   }
 }
