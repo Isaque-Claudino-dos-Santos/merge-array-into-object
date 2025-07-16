@@ -2,7 +2,6 @@
 
 namespace MAIO\Tests\MergeArrayIntoObject;
 
-use Illuminate\Support\Str;
 use MAIO\Attributes\Call;
 use MAIO\Attributes\Key;
 use MAIO\Exceptions\KeyInArrayNotFoundException;
@@ -15,26 +14,24 @@ class MergeArrayIntoObjectTest extends TestCase
 {
 
     #[Test]
-    #[Ticket('#1')]
+    #[Ticket('#1'), Ticket('#16')]
     public function it_should_call_static_method_on_static_call_is_present_in_property_successfully()
     {
         $object = new class {
-            #[Key('full_name')]
-            #[Call(Str::class, 'snake')]
-            #[Call(Str::class, 'upper')]
+            #[Key('user.full_name')]
+            #[Call('strtoupper')]
             public string $name;
-
-            public static function toUpperCase(string $value): string
-            {
-                return strtoupper($value);
-            }
         };
 
-        $array = ['full_name' => 'john doe'];
+        $array = [
+            'user' => [
+                'full_name' => 'john doe'
+            ]
+        ];
 
         $maio = new MergeArrayIntoObject();
         $mergedObject = $maio->merge($object, $array);
-        $this->assertEquals('JOHN_DOE', $mergedObject->name);
+        $this->assertEquals('JOHN DOE', $mergedObject->name);
     }
 
     #[Test]

@@ -2,7 +2,6 @@
 
 namespace MAIO;
 
-use Illuminate\Support\Arr;
 use MAIO\Attributes\Call;
 use MAIO\Attributes\Key;
 use MAIO\Exceptions\KeyInArrayNotFoundException;
@@ -12,30 +11,76 @@ use ReflectionProperty;
 
 class MergeArrayIntoObject
 {
+    private function arrayHas(array $data, string|int|null $key): bool
+    {
+        if ($key === null) {
+            return false;
+        }
+
+        if (is_int($key)) {
+            return key_exists($key, $data);
+        }
+
+        $paths = explode('.', $key);
+
+        foreach ($paths as $path) {
+            if (!key_exists($path, $data)) {
+                return false;
+            }
+
+            $data = $data[$path];
+        }
+
+        return true;
+    }
+
+    private function arrayDontHas(array $data, string|int|null $key): bool
+    {
+        return !$this->arrayHas($data, $key);
+    }
+
+    private function arrayGet(array $data, string|int|null $key, mixed $defaultValue = null): mixed
+    {
+        if ($key === null) {
+            return $defaultValue;
+        }
+
+        if (is_int($key)) {
+            return key_exists($key, $data) ? $data[$key] : $defaultValue;
+        }
+
+        $paths = explode('.', $key);
+
+        foreach ($paths as $path) {
+            if (!key_exists($path, $data)) {
+                return $defaultValue;
+            }
+
+            $data = $data[$path];
+        }
+
+        return $data;
+    }
 
     private function handleProperty(object $target, ReflectionProperty $property, array $data): void
     {
         $key = $property->getName();
         $hasDefaultValue = $property->hasDefaultValue();
         $defaultValue = $hasDefaultValue ? $property->getDefaultValue() : null;
-        $value = Arr::get($data, $key, $defaultValue);
+        $value = $this->arrayGet($data, $key, $defaultValue);
 
         foreach ($property->getAttributes(Key::class) as $attribute) {
             $argKey = $attribute->getArguments()[0];
 
-            if (empty($argKey)) {
-                continue;
-            }
-
-            if (Arr::has($data, $argKey)) {
+            if ($this->arrayHas($data, $argKey)) {
                 $key = $argKey;
-                $value = Arr::get($data, $key, $defaultValue);
+                $value = $this->arrayGet($data, $key, $defaultValue);
             }
         }
 
         foreach ($property->getAttributes(Call::class) as $attribute) {
             $objectOrClassOrFunction = $attribute->getArguments()[0];
-            $methodName = $attribute->getArguments()[1];
+            $methodName = $attribute->getArguments()[1] ?? null;
 
             $isClass = class_exists($objectOrClassOrFunction);
             $isFunction = function_exists($objectOrClassOrFunction);
@@ -57,7 +102,7 @@ class MergeArrayIntoObject
             }
         }
 
-        $dontIsAvailableToSetValueInProperty = !$hasDefaultValue && !Arr::has($data, $key);
+        $dontIsAvailableToSetValueInProperty = !$hasDefaultValue && $this->arrayDontHas($data, $key);
 
         if ($dontIsAvailableToSetValueInProperty) {
             throw new KeyInArrayNotFoundException($key);
