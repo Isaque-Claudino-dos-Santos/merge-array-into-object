@@ -70,10 +70,9 @@ class MergeArrayIntoObject
         $value = $this->arrayGet($data, $key, $defaultValue);
 
         foreach ($property->getAttributes(Key::class) as $attribute) {
-            $argKey = $attribute->getArguments()[0];
+            $key = $attribute->getArguments()[0] ?? null;
 
-            if ($this->arrayHas($data, $argKey)) {
-                $key = $argKey;
+            if ($this->arrayHas($data, $key)) {
                 $value = $this->arrayGet($data, $key, $defaultValue);
             }
         }
