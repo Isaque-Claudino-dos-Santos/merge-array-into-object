@@ -4,9 +4,7 @@
   "description": "A package to merge arrays into objects in PHP.",
   "autoload": {
     "psr-4": {
-      "MAIO\\Attributes\\": "src/Attributes/",
-      "MAIO\\Exceptions\\": "src/Exceptions/",
-      "MAIO\\": "src/MergeArrayIntoObject.php"
+      "MAIO\\": "src/"
     }
   },
   "require": {
