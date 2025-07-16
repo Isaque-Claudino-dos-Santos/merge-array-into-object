@@ -14,7 +14,7 @@ class MergeArrayIntoObjectTest extends TestCase
 {
 
     #[Test]
-    #[Ticket('#1')]
+    #[Ticket('#1'), Ticket('#16')]
     public function it_should_call_static_method_on_static_call_is_present_in_property_successfully()
     {
         $object = new class {
