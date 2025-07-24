@@ -2,6 +2,8 @@
 
 namespace MAIO;
 
+use Exception;
+use MAIO\Attributes\ArrayOf;
 use MAIO\Attributes\Call;
 use MAIO\Attributes\Key;
 use MAIO\Exceptions\KeyInArrayNotFoundException;
@@ -75,6 +77,20 @@ class MergeArrayIntoObject
             if ($this->arrayHas($data, $key)) {
                 $value = $this->arrayGet($data, $key, $defaultValue);
             }
+        }
+
+        foreach ($property->getAttributes(ArrayOf::class) as $attribute) {
+            $className = $attribute->getArguments()[0] ?? null;
+
+            if ($property->getType()->__tostring() !== 'array') {
+                throw new Exception("The property {$key} should is array to use ArrayOf attribute");
+            }
+
+            if (!is_array($value)) {
+                throw new Exception("Received value on {$key} should is array");
+            }
+
+            $value = array_map(fn($item): object => $this->merge(new $className, $item), $value);
         }
 
         foreach ($property->getAttributes(Call::class) as $attribute) {
