@@ -13,6 +13,20 @@ use ReflectionProperty;
 
 class MergeArrayIntoObject
 {
+    public static bool $checkSnakeCase = false;
+
+    private function toSnakeCase(string $value, bool $toLower = true): string
+    {
+        $value = preg_split('/([A-Z][a-z]*)/', $value, flags: PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+        $value = implode('_', $value);
+
+        if ($toLower) {
+            $value = strtolower($value);
+        }
+
+        return $value;
+    }
+
     private function arrayHas(array $data, string|int|null $key): bool
     {
         if ($key === null) {
@@ -67,9 +81,21 @@ class MergeArrayIntoObject
     private function handleProperty(object $target, ReflectionProperty $property, array $data): void
     {
         $key = $property->getName();
+        $keyExistsInData = $this->arrayHas($data, $key);
         $hasDefaultValue = $property->hasDefaultValue();
-        $defaultValue = $hasDefaultValue ? $property->getDefaultValue() : null;
+        $defaultValue = (!$keyExistsInData && $hasDefaultValue) ? $property->getDefaultValue() : null;
         $value = $this->arrayGet($data, $key, $defaultValue);
+
+        // Process snake case in key
+        if (!$keyExistsInData && self::$checkSnakeCase) {
+            $keyInSnakeCase = $this->toSnakeCase($key);
+            $keyExistsInData = $this->arrayHas($data, $keyInSnakeCase);
+
+            if ($keyExistsInData) {
+                $key = $keyInSnakeCase;
+                $value = $this->arrayGet($data, $key);
+            }
+        }
 
         foreach ($property->getAttributes(Key::class) as $attribute) {
             $key = $attribute->getArguments()[0] ?? null;
