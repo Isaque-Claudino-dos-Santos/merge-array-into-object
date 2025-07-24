@@ -14,6 +14,20 @@ use ReflectionProperty;
 class MergeArrayIntoObject
 {
     public static bool $checkSnakeCase = false;
+    public static bool $checkCamelCase = false;
+
+    private function toCamelCase(string $value, ?bool $toTitle = false): string
+    {
+        $value = preg_split('/_/', $value, flags: PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+        $value = array_map(fn(string $word) => ucfirst($word), $value);
+        $value = implode('', $value);
+
+        if (!$toTitle) {
+            $value = lcfirst($value);
+        }
+
+        return $value;
+    }
 
     private function toSnakeCase(string $value, bool $toLower = true): string
     {
@@ -97,10 +111,22 @@ class MergeArrayIntoObject
             }
         }
 
+        // Process camel case in key
+        if (!$keyExistsInData && self::$checkCamelCase) {
+            $keyInCamelCase = $this->toCamelCase($key);
+            $keyExistsInData = $this->arrayHas($data, $keyInCamelCase);
+
+            if ($keyExistsInData) {
+                $key = $keyInCamelCase;
+                $value = $this->arrayGet($data, $key);
+            }
+        }
+
         foreach ($property->getAttributes(Key::class) as $attribute) {
             $key = $attribute->getArguments()[0] ?? null;
 
             if ($this->arrayHas($data, $key)) {
+                $keyExistsInData = true;
                 $value = $this->arrayGet($data, $key, $defaultValue);
             }
         }
