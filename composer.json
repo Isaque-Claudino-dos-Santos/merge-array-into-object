@@ -23,7 +23,7 @@
   ],
   "autoload": {
     "psr-4": {
-      "MAIO\\": "src/"
+      "ISQ\\MAIO\\": "src/"
     }
   },
   "require": {

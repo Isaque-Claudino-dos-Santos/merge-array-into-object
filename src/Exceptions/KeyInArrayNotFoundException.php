@@ -1,6 +1,6 @@
 <?php
 
-namespace MAIO\Exceptions;
+namespace ISQ\MAIO\Exceptions;
 
 use Exception;
 

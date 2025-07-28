@@ -1,10 +1,10 @@
 <?php
 
-namespace MAIO\Tests\MergeArrayIntoObject;
+namespace ISQ\MAIO\Tests\MergeArrayIntoObject;
 
 use Exception;
-use MAIO\Attributes\ArrayOf;
-use MAIO\MergeArrayIntoObject;
+use ISQ\MAIO\Attributes\ArrayOf;
+use ISQ\MAIO\MergeArrayIntoObject;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\Ticket;
 use PHPUnit\Framework\TestCase;

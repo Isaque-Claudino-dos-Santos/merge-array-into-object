@@ -1,8 +1,8 @@
 <?php
 
-namespace MAIO\Tests\MergeArrayIntoObject;
+namespace Tests;
 
-use MAIO\MergeArrayIntoObject;
+use ISQ\MAIO\MergeArrayIntoObject;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\Ticket;
