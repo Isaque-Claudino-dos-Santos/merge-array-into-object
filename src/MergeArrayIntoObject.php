@@ -13,8 +13,19 @@ use ReflectionProperty;
 
 class MergeArrayIntoObject
 {
+    private static ?MergeArrayIntoObject $instance = null;
+
     public static bool $checkSnakeCase = false;
     public static bool $checkCamelCase = false;
+
+    public static function getInstance(): MergeArrayIntoObject
+    {
+        if (self::$instance === null) {
+            return new MergeArrayIntoObject();
+        }
+
+        return self::$instance;
+    }
 
     private function toCamelCase(string $value, ?bool $toTitle = false): string
     {

@@ -62,6 +62,6 @@ class MergeArrayIntoObjectTest extends TestCase
 
         $array = ['age' => 12];
 
-        (new MergeArrayIntoObject())->merge($object, $array);
+        MergeArrayIntoObject::getInstance()->merge($object, $array);
     }
 }
