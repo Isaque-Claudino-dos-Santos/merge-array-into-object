@@ -40,7 +40,7 @@ class ArrayOfAttributesTest extends TestCase
         $this->assertEquals('Mick', $result->users[0]->name);
         $this->assertEquals('Michael', $result->users[1]->name);
         $this->assertEquals('Isaque', $result->users[2]->name);
-        $this->assertEquals('Pablo', $result->users[2]->name);
+        $this->assertEquals('Pablo', $result->users[3]->name);
     }
 
     #[Test]
