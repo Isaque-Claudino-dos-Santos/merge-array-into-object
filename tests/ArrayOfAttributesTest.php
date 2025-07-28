@@ -1,10 +1,10 @@
 <?php
 
-namespace MAIO\Tests\MergeArrayIntoObject;
+namespace ISQ\MAIO\Tests\MergeArrayIntoObject;
 
 use Exception;
-use MAIO\Attributes\ArrayOf;
-use MAIO\MergeArrayIntoObject;
+use ISQ\MAIO\Attributes\ArrayOf;
+use ISQ\MAIO\MergeArrayIntoObject;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\Ticket;
 use PHPUnit\Framework\TestCase;
@@ -40,7 +40,7 @@ class ArrayOfAttributesTest extends TestCase
         $this->assertEquals('Mick', $result->users[0]->name);
         $this->assertEquals('Michael', $result->users[1]->name);
         $this->assertEquals('Isaque', $result->users[2]->name);
-        $this->assertEquals('Pablo', $result->users[2]->name);
+        $this->assertEquals('Pablo', $result->users[3]->name);
     }
 
     #[Test]

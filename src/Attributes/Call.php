@@ -1,6 +1,6 @@
 <?php
 
-namespace MAIO\Attributes;
+namespace ISQ\MAIO\Attributes;
 
 use Attribute;
 

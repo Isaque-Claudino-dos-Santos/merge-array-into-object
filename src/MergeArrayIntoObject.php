@@ -1,13 +1,13 @@
 <?php
 
-namespace MAIO;
+namespace ISQ\MAIO;
 
 use Exception;
-use MAIO\Attributes\ArrayOf;
-use MAIO\Attributes\Call;
-use MAIO\Attributes\Key;
-use MAIO\Exceptions\KeyInArrayNotFoundException;
-use MAIO\Exceptions\MethodNotExistsException;
+use ISQ\MAIO\Attributes\ArrayOf;
+use ISQ\MAIO\Attributes\Call;
+use ISQ\MAIO\Attributes\Key;
+use ISQ\MAIO\Exceptions\KeyInArrayNotFoundException;
+use ISQ\MAIO\Exceptions\MethodNotExistsException;
 use ReflectionClass;
 use ReflectionProperty;
 

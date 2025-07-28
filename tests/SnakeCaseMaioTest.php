@@ -1,6 +1,6 @@
 <?php
 
-use MAIO\MergeArrayIntoObject;
+use ISQ\MAIO\MergeArrayIntoObject;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\Ticket;
 use PHPUnit\Framework\TestCase;
