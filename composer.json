@@ -2,6 +2,7 @@
   "name": "isq/maio",
   "license": "MIT",
   "description": "A package to merge arrays into objects in PHP.",
+  "readme": "README.md",
   "keywords": [
     "merge",
     "object",

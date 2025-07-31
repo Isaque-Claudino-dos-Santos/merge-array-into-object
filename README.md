@@ -1,192 +1,175 @@
-# Merge Array Into Object (MAIO)
+# Merge Array Into Object
 
-A package to merge arrays into objects in PHP.
+## Introdução
 
-## Installation
+Pacote `composer` para mesclar um `array` em uma `class/object` de forma padronizada.
+
+### Instalação
 
 ```bash
 composer require isq/maio
 ```
 
-## Basic Usage
+## Básico
+
+Para todos o exemplo vamos usar a classe `CreateUserDTO` e `CreateUserAddressDTO`.
+
+### Mesclando Dados de um `Array` para `Class/Object`
+
+Para isso você deve usar o método `merge` da classe `ISQ\MAIO\MergeArrayIntoObject`.
 
 ```php
-use MAIO\MergeArrayIntoObject;
+use ISQ\MAIO\MergeArrayIntoObject;
 
 class CreateUserDTO {
-    public string $firstName;
-    public string $lastName;
-    public string $email;
-    public int $age;
+	public readonly string $firstName;
+	public readonly string $lastName;
 }
 
 $data = [
-    'firstName' => 'John',
-    'lastName' => 'Doe',
-    'email' => 'john.doe@example.com',
-    'age' => 30,
+	'firstName' => 'Foo',
+	'lastName' => 'Baz'
 ];
 
-$dto = new MergeArrayIntoObject()->merge(new CreateUserDTO, $data);
+$maio = MergeArrayIntoObject::getInstance();
+$createUserDTO = $maio->merge(new CreateUserDTO, $data);
 
-print_r($dto);
-
-// Output:
-// CreateUserDTO Object
-// (
-//     [firstName] => John
-//     [lastName] => Doe
-//     [email] => john.doe@example.com
-//     [age] => 30
-// )
-
+echo $createUserDTO::class; // CreateUserDTO
+echo $createUserDTO->firstName; // Foo
+echo $createUserDTO->lastName; // Baz
 ```
 
-## Define Key to Merge
+Perceba que todos os dados de `$data` foi mesclado conforme o nome dadas propriedades class classe, quando usado o método `merge` é retornado a instância da class `CreateUserDTO` com as propriedades preenchi.
 
-You can define the key to merge using the `Key` attribute.
+### Definir Chave Externa com `#[Key]`
+
+Tem casos que você tem um nome de propriedade que não combina com os dados recebidos ou estão em cadeia, para resolver isso é possível usar o atributo `ISQ\MAIO\Attributes\Key`.
 
 ```php
-use MAIO\MergeArrayIntoObject;
+use ISQ\MAIO\MergeArrayIntoObject;
+use ISQ\MAIO\Attributes\Key;
 
 class CreateUserDTO {
-    #[Key('first_name')]
-    public string $firstName;
-    public string $lastName;
-    public string $email;
-    public int $age;
+	public readonly string $firstName;
+	public readonly string $lastName;
+	#[Key('user_age')]
+	public readonly int $age;
+	#[Key('address.postal_code')]
+	public readonly int $postalCode;
 }
 
 $data = [
-    'first_name' => 'John',
-    'lastName' => 'Doe',
-    'email' => 'john.doe@example.com',
-    'age' => 30,
+	'firstName' => 'Foo',
+	'lastName' => 'Baz',
+	'user_age' => 34,
+	'address' => [
+		'postal_code' => 12312311
+	]
 ];
 
-$dto = new MergeArrayIntoObject()->merge(new CreateUserDTO, $data);
+$maio = MergeArrayIntoObject::getInstance();
+$createUserDTO = $maio->merge(new CreateUserDTO, $data);
 
-print_r($dto);
-
-// Output:
-// CreateUserDTO Object
-// (
-//     [firstName] => John
-//     [lastName] => Doe
-//     [email] => john.doe@example.com
-//     [age] => 30
-// )
+echo $createUserDTO::class; // CreateUserDTO
+echo $createUserDTO->firstName; // Foo
+echo $createUserDTO->lastName; // Baz
+echo $createUserDTO->age; // 34
+echo $createUserDTO->postalCode; // 12312311
 ```
 
-## Define Static Method to Merge
+Perceba que as propriedades `$age` e `$postalcode` não combinam com o que tem dentro da variável `$data` então foi “renomeado” com o atributo `Key`.
 
-You can call method static of the type defined in property with attribute `StaticCall`.
+> Quando é passado para `Key` o texto `address.postal_code` é referente a estrutura: 
+`{ 
+   ”address”: {
+      “postal_code”: 12312311
+   }
+ }`
+> 
+
+### Executar Função em uma Propriedade com o Atributo `#[Call]`
+
+Caso precise manipular o valor vindo de `$data` é possível usar o atributo `ISQ\MAIO\Attributes\Call`.
 
 ```php
-use MAIO\MergeArrayIntoObject;
+use ISQ\MAIO\MergeArrayIntoObject;
+use ISQ\MAIO\Attributes\Call;
 
-class UserModel {
-    public static function find(int $id): UserModel
-    {
-        // Find user by id
-    }
+class MyHelper {
+	public static function add(int $value): int
+	{
+		return $value + 1;
+	}
+	
+	public function toUpperCase(string $value): string
+	{
+		return strtoupper($value);
+	}
 }
 
 class CreateUserDTO {
-    #[Key('user_id')]
-    #[Call(UserModel::class, 'find')]
-    public UserModel $user;
+	#[Call(MyHelper::class, 'add')]
+	public readonly int $id;
+	
+	#[Call('strtoupper')]
+	public readonly string $firstName;
+	
+	#[Call(new MyHelper, 'toUpperCase')]
+	public readonly string $lastName;
 }
-
 
 $data = [
-    'user_id' => 1,
+	'id' => 0,
+	'firstName' => 'Foo',
+	'lastName' => 'Baz'
 ];
 
-$dto = new MergeArrayIntoObject()->merge(new CreateUserDTO, $data);
+$maio = MergeArrayIntoObject::getInstance();
+$createUserDTO = $maio->merge(new CreateUserDTO, $data);
 
-print_r($dto);
-
-// Output:
-// CreateUserDTO Object
-// (
-//     [user] => UserModel Object
-// )
+echo $createUserDTO::class; // CreateUserDTO
+echo $createUserDTO->id; // 1
+echo $createUserDTO->firstName; // FOO
+echo $createUserDTO->lastName; // BAZ
 ```
 
-## Real use Example with Laravel
+Perceba que o assim que o valor `id` de `$data` é recuperado, a propriedade `$id` usa o atributo `Call` para invocar o método `add` estático dentro de `MyHelper` classe, assim fazendo a repassando o valor de `id` dentro de `$data` para o método e atribuindo o retorno a propriedade `$id`.
+
+### Definindo Listas com `ArrayOf`
+
+Para definir uma lista de itens para uma class especifica é possível com `ISQ\MAIO\Attributes\ArrayOf`.
 
 ```php
-// routes/web.php
+use ISQ\MAIO\MergeArrayIntoObject;
+use ISQ\MAIO\Attributes\ArrayOf;
 
-<?php
-
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Route;
-use MAIO\Attributes\Call;
-use MAIO\Attributes\Key;
-use MAIO\MergeArrayIntoObject;
-
-class BaseDTO
-{
-    public static function make(array $data)
-    {
-        return (new MergeArrayIntoObject())->merge(new static(), $data);
-    }
+class User {
+	public readonly string $id;
 }
 
-class UserDTO extends BaseDTO
-{
-    #[Key('first_name')]
-    public string $firstName;
-
-    #[Key('last_name')]
-    public string $lastName;
-
-    #[Key('age')]
-    public int $age;
-
-    #[Key('address_data'), Call(AddressDTO::class, 'make')]
-    public AddressDTO $address;
+class UsersDTO {
+	#[ArrayOf(User::class)]
+	public readonly array $data;
 }
 
-class AddressDTO extends BaseDTO
-{
-    public string $streat;
-    public string $number;
-}
-
-$simulateRequestData = [
-    'first_name' => 'Thor',
-    'last_name' => 'Hack',
-    'age' => 21,
-    'address_data' => [
-        'streat' => 'Streat Oazis',
-        'number' => 123
-    ]
+$data = [
+	'data' => [
+		['id' => 1],
+		['id' => 2],
+		['id' => 3],
+		['id' => 4]
+	]
 ];
 
-Route::get('/', function (): JsonResponse use($simulateRequestData) {
-    $dto = UserDTO::make($simulateRequestData);
+$maio = MergeArrayIntoObject::getInstance();
+$usersDTO = $maio->merge(new CreateUserDTO, $data);
 
-    $address = Address::create([
-        'streat' => $dto->address->streat,
-        'number' => $dto->address->number
-    ]);
-
-    $user = User::create([
-        'first_name' => $dto->firstName,
-        'last_name' => $dto->lastName,
-        'age' => $dto->age,
-        'address_id' => $address->id
-    ]);
-
-    return response()->json([
-        'data' => UserResource::make($user)
-    ]);
-});
+echo $createUserDTO::class; // UsersDTO
+echo $usersDTO[0]::class; // User
+echo $usersDTO[0]->id; // 1
+echo $usersDTO[1]->id; // 2
+echo $usersDTO[2]->id; // 3
+echo $usersDTO[3]->id; // 4
 ```
 
-Output:
-
-![alt text](docs/real-output-example.png)
+Perceba que a lista dentro `$data` é transformada em uma lista da classe `User`.
