@@ -4,6 +4,8 @@ namespace ISQ\MAIO\Tests\MergeArrayIntoObject;
 
 use Exception;
 use ISQ\MAIO\Attributes\ArrayOf;
+use ISQ\MAIO\Attributes\Call;
+use ISQ\MAIO\Attributes\Key;
 use ISQ\MAIO\MergeArrayIntoObject;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\Ticket;
@@ -12,6 +14,11 @@ use PHPUnit\Framework\TestCase;
 class User
 {
     public string $name;
+
+    public static function getName(User $user)
+    {
+        return $user->name;
+    }
 }
 
 class ArrayOfAttributesTest extends TestCase
@@ -84,5 +91,33 @@ class ArrayOfAttributesTest extends TestCase
         ];
 
         (new MergeArrayIntoObject())->merge($target, $data);
+    }
+
+    #[Test]
+    #[Ticket('#31')]
+    public function it_should_transform_array_value_in_object_passed_on_define_attribute_array_of_with_call_attribute_successfully()
+    {
+        $target = new class {
+            /** @var array<string> */
+            #[Key('users'), ArrayOf(User::class), Call(User::class, 'getName')]
+            public array $names;
+        };
+
+        $data = [
+            'users' => [
+                ['name' => 'Mick'],
+                ['name' => 'Michael'],
+                ['name' => 'Isaque'],
+                ['name' => 'Pablo'],
+            ],
+        ];
+
+        $result = (new MergeArrayIntoObject)->merge($target, $data);
+        $this->assertEquals($result->names, [
+            'Mick',
+            'Michael',
+            'Isaque',
+            'Pablo',
+        ]);
     }
 }
