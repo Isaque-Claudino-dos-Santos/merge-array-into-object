@@ -7,7 +7,6 @@ use ISQ\MAIO\Attributes\ArrayOf;
 use ISQ\MAIO\Attributes\Call;
 use ISQ\MAIO\Attributes\Key;
 use ISQ\MAIO\Exceptions\KeyInArrayNotFoundException;
-use ISQ\MAIO\Exceptions\MethodNotExistsException;
 use ReflectionClass;
 use ReflectionProperty;
 
@@ -153,31 +152,23 @@ class MergeArrayIntoObject
                 throw new Exception("Received value on {$key} should is array");
             }
 
-            $value = array_map(fn($item): object => $this->merge(new $className, $item), $value);
+            $value = array_map(function ($item) use ($className, $property, $target) {
+                $value = $this->merge(new $className, $item);
+
+                foreach ($property->getAttributes(Call::class) as $attribute) {
+                    $attribute->newInstance()->process($target, $value);
+                }
+
+                return $value;
+            }, $value);
+            
+            $property->setValue($target, $value);
+
+            return;
         }
 
         foreach ($property->getAttributes(Call::class) as $attribute) {
-            $objectOrClassOrFunction = $attribute->getArguments()[0];
-            $methodName = $attribute->getArguments()[1] ?? null;
-
-            $isClass = class_exists($objectOrClassOrFunction);
-            $isFunction = function_exists($objectOrClassOrFunction);
-            $isObject = is_object($objectOrClassOrFunction);
-
-            if ($isClass || $isObject) {
-                $reflection = new ReflectionClass($objectOrClassOrFunction);
-
-                if (!$reflection->hasMethod($methodName)) {
-                    throw new MethodNotExistsException("Method static $methodName not found in $objectOrClassOrFunction");
-                }
-
-                $method = $reflection->getMethod($methodName);
-                $value = $method->invoke($target, $value);
-            }
-
-            if ($isFunction) {
-                $value = $objectOrClassOrFunction($value);
-            }
+            $attribute->newInstance()->process($target, $value);
         }
 
         $dontIsAvailableToSetValueInProperty = !$hasDefaultValue && $this->arrayDontHas($data, $key);
