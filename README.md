@@ -1,5 +1,7 @@
 # Merge Array Into Object
 
+[![Testes](https://github.com/Isaque-Claudino-dos-Santos/merge-array-into-object/actions/workflows/php-tests.yml/badge.svg)](https://github.com/Isaque-Claudino-dos-Santos/merge-array-into-object/actions/workflows/php-tests.yml)
+
 ## Introdução
 
 Pacote `composer` para mesclar um `array` em uma `class/object` de forma padronizada.
