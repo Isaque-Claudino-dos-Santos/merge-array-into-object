@@ -5,10 +5,18 @@ namespace ISQ\MAIO;
 use ISQ\MAIO\Attributes\ArrayOf;
 use ISQ\MAIO\Attributes\Call;
 use ISQ\MAIO\Attributes\Key;
+use ISQ\MAIO\Attributes\Processors\ArrayOfProcessor;
+use ISQ\MAIO\Attributes\Processors\KeyProcessor;
+use ISQ\MAIO\Exceptions\InvalidTypeToSetException;
 use ISQ\MAIO\Exceptions\KeyInArrayNotFoundException;
+use ISQ\MAIO\Traits\ResolveCamelCaseTrait;
+use ISQ\MAIO\Traits\ResolveSnakeCaseTrait;
 
 class MergeArrayIntoObject
 {
+	use ResolveSnakeCaseTrait;
+	use ResolveCamelCaseTrait;
+
 	private static ?MergeArrayIntoObject $instance = null;
 
 	public static bool $checkSnakeCase = false;
@@ -23,155 +31,51 @@ class MergeArrayIntoObject
 		return self::$instance;
 	}
 
-	private function toCamelCase(string $value, ?bool $toTitle = false): string
-	{
-		$value = preg_split('/_/', $value, flags: PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
-		$value = array_map(fn (string $word) => ucfirst($word), $value);
-		$value = implode('', $value);
-
-		if (! $toTitle) {
-			$value = lcfirst($value);
-		}
-
-		return $value;
-	}
-
-	private function toSnakeCase(string $value, bool $toLower = true): string
-	{
-		$value = preg_split('/([A-Z][a-z]*)/', $value, flags: PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
-		$value = implode('_', $value);
-
-		if ($toLower) {
-			$value = strtolower($value);
-		}
-
-		return $value;
-	}
-
-	private function arrayHas(array $data, string|int|null $key): bool
-	{
-		if (null === $key) {
-			return false;
-		}
-
-		if (is_int($key)) {
-			return key_exists($key, $data);
-		}
-
-		$paths = explode('.', $key);
-
-		foreach ($paths as $path) {
-			if (! key_exists($path, $data)) {
-				return false;
-			}
-
-			$data = $data[$path];
-		}
-
-		return true;
-	}
-
-	private function arrayDontHas(array $data, string|int|null $key): bool
-	{
-		return ! $this->arrayHas($data, $key);
-	}
-
-	private function arrayGet(array $data, string|int|null $key, mixed $defaultValue = null): mixed
-	{
-		if (null === $key) {
-			return $defaultValue;
-		}
-
-		if (is_int($key)) {
-			return key_exists($key, $data) ? $data[$key] : $defaultValue;
-		}
-
-		$paths = explode('.', $key);
-
-		foreach ($paths as $path) {
-			if (! key_exists($path, $data)) {
-				return $defaultValue;
-			}
-
-			$data = $data[$path];
-		}
-
-		return $data;
-	}
-
 	private function handleProperty(object $target, \ReflectionProperty $property, array $data): void
 	{
 		$key = $property->getName();
-		$keyExistsInData = $this->arrayHas($data, $key);
-		$hasDefaultValue = $property->hasDefaultValue() || $property->getType()->allowsNull();
+		$keyExistsInData = array_has_key($data, $key);
+		$propertyType = $property->getType();
+		$propertyTypeName = $property->getType()->__toString();
+		$propertyAllowsNull = $propertyType->allowsNull();
+		$hasDefaultValue = $property->hasDefaultValue() || $propertyAllowsNull;
 		$defaultValue = (! $keyExistsInData && $hasDefaultValue) ? $property->getDefaultValue() : null;
-		$value = $this->arrayGet($data, $key, $defaultValue);
+		$value = array_get($data, $key, $defaultValue);
 
-		// Process snake case in key
 		if (! $keyExistsInData && self::$checkSnakeCase) {
-			$keyInSnakeCase = $this->toSnakeCase($key);
-			$keyExistsInData = $this->arrayHas($data, $keyInSnakeCase);
-
-			if ($keyExistsInData) {
-				$key = $keyInSnakeCase;
-				$value = $this->arrayGet($data, $key);
-			}
+			$this->resolveSnakeCase($key, $value, $data);
 		}
 
-		// Process camel case in key
 		if (! $keyExistsInData && self::$checkCamelCase) {
-			$keyInCamelCase = $this->toCamelCase($key);
-			$keyExistsInData = $this->arrayHas($data, $keyInCamelCase);
-
-			if ($keyExistsInData) {
-				$key = $keyInCamelCase;
-				$value = $this->arrayGet($data, $key);
-			}
+			$this->resolveCamelCase($key, $value, $data);
 		}
 
 		foreach ($property->getAttributes(Key::class) as $attribute) {
-			$key = $attribute->getArguments()[0] ?? null;
-
-			if ($this->arrayHas($data, $key)) {
-				$keyExistsInData = true;
-				$value = $this->arrayGet($data, $key, $defaultValue);
-			}
+			$processor = new KeyProcessor($data);
+			$processor->process($attribute);
+			$keyExistsInData = $processor->keyExists();
+			$key = $processor->getKey() ?? $key;
+			$value = $processor->getValue() ?? $defaultValue;
 		}
 
 		foreach ($property->getAttributes(ArrayOf::class) as $attribute) {
-			$className = $attribute->getArguments()[0] ?? null;
-
-			if ('array' !== $property->getType()->__toString()) {
-				throw new \Exception("The property {$key} should is array to use ArrayOf attribute");
-			}
-
-			if (! is_array($value)) {
-				throw new \Exception("Received value on {$key} should is array");
-			}
-
-			$value = array_map(function ($item) use ($className, $property, $target) {
-				$value = $this->merge(new $className(), $item);
-
-				foreach ($property->getAttributes(Call::class) as $attribute) {
-					$attribute->newInstance()->process($target, $value);
-				}
-
-				return $value;
-			}, $value);
-
-			$property->setValue($target, $value);
-
-			return;
+			$processor = new ArrayOfProcessor($value);
+			$processor->process($attribute);
+			$value = $processor->getValue() ?? $defaultValue;
 		}
 
 		foreach ($property->getAttributes(Call::class) as $attribute) {
 			$attribute->newInstance()->process($target, $value);
 		}
 
-		$dontIsAvailableToSetValueInProperty = ! $hasDefaultValue && $this->arrayDontHas($data, $key);
+		$dontIsAvailableToSetValueInProperty = ! $hasDefaultValue && ! array_has_key($data, $key);
 
 		if ($dontIsAvailableToSetValueInProperty) {
 			throw new KeyInArrayNotFoundException($key);
+		}
+
+		if (! $propertyAllowsNull && ! str_contains(gettype($value), $propertyTypeName)) {
+			throw new InvalidTypeToSetException($key);
 		}
 
 		$property->setValue($target, $value);
@@ -184,7 +88,7 @@ class MergeArrayIntoObject
 	 *
 	 * @return T
 	 */
-	public function merge(object $target, ?array $data): object
+	public function merge(mixed $target, ?array $data): object
 	{
 		$targetReflection = new \ReflectionClass($target);
 
