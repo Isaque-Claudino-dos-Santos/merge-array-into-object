@@ -1,0 +1,9 @@
+{
+  "recommendations": [
+    "junstyle.php-cs-fixer",
+    "DEVSENSE.profiler-php-vscode",
+    "DEVSENSE.composer-php-vscode",
+    "DEVSENSE.intelli-php-vscode",
+    "DEVSENSE.phptools-vscode"
+  ]
+}
