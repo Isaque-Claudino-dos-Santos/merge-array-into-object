@@ -103,7 +103,7 @@ class MergeArrayIntoObject
 	{
 		$key = $property->getName();
 		$keyExistsInData = $this->arrayHas($data, $key);
-		$hasDefaultValue = $property->hasDefaultValue();
+		$hasDefaultValue = $property->hasDefaultValue() || $property->getType()->allowsNull();
 		$defaultValue = (! $keyExistsInData && $hasDefaultValue) ? $property->getDefaultValue() : null;
 		$value = $this->arrayGet($data, $key, $defaultValue);
 
@@ -186,9 +186,6 @@ class MergeArrayIntoObject
 	 */
 	public function merge(object $target, ?array $data): object
 	{
-		if (empty($data)) {
-			return $target;
-		}
 		$targetReflection = new \ReflectionClass($target);
 
 		foreach ($targetReflection->getProperties() as $property) {
