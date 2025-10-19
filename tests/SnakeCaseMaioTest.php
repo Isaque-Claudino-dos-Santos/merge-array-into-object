@@ -5,28 +5,29 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\Ticket;
 use PHPUnit\Framework\TestCase;
 
-
+/**
+ * @internal
+ *
+ * @coversNothing
+ */
 class SnakeCaseMaioTest extends TestCase
 {
-    #[Test]
-    #[Ticket('#19')]
-    public function it_should_resolve_snake_case_array_key_in_attribute_of_class_successfully()
-    {
-        MergeArrayIntoObject::$checkSnakeCase = true;
+	#[Test]
+	#[Ticket('#19')]
+	public function itShouldResolveSnakeCaseArrayKeyInAttributeOfClassSuccessfully()
+	{
+		MergeArrayIntoObject::$checkSnakeCase = true;
 
-        $target = new class {
-            public string $firstName;
-        };
+		$target = new class {
+			public string $firstName;
+		};
 
-        $data = [
-            'first_name' => 'John'
-        ];
+		$data = [
+			'first_name' => 'John',
+		];
 
-        $resolved = (new MergeArrayIntoObject)->merge($target, $data);
+		$resolved = (new MergeArrayIntoObject())->merge($target, $data);
 
-        $this->assertEquals('John', $resolved->firstName);
-    }
+		$this->assertEquals('John', $resolved->firstName);
+	}
 }
-
-
-
