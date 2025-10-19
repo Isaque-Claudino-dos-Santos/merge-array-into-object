@@ -2,8 +2,6 @@
 
 namespace ISQ\MAIO\Exceptions;
 
-use Exception;
-
-class MethodNotExistsException extends Exception
+class MethodNotExistsException extends \Exception
 {
 }
