@@ -2,10 +2,12 @@
 
 namespace ISQ\MAIO\Attributes;
 
-#[\Attribute(\Attribute::TARGET_PROPERTY)]
+use Attribute;
+
+#[Attribute(Attribute::TARGET_PROPERTY)]
 class Key
 {
-	public function __construct(public string $key)
-	{
-	}
+    public function __construct(public string $key)
+    {
+    }
 }
