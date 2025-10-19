@@ -3,6 +3,9 @@
   "php-cs-fixer.config": ".php-cs-fixer.dist.php",
   "php-cs-fixer.executablePath": "${workspaceFolder}/vendor/bin/php-cs-fixer",
   // PHP-CS-FIX (END)
+  "php.suggest.basic": false,
+  "editor.parameterHints.enabled": false,
+  "php.inlayHints.parameters.enabled": false,
 
   // FORMATER (INIT)
   "editor.formatOnSave": true,
