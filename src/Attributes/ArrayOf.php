@@ -13,10 +13,5 @@ class ArrayOf
 	 */
 	public function __construct(public string $target)
 	{
-		(array) [1, 3];
-		(array) [
-			1 => 3,
-			3 => 2,
-		];
 	}
 }
