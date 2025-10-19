@@ -1,6 +1,8 @@
 # Merge Array Into Object
 
-[![Testes](https://github.com/Isaque-Claudino-dos-Santos/merge-array-into-object/actions/workflows/php-tests.yml/badge.svg)](https://github.com/Isaque-Claudino-dos-Santos/merge-array-into-object/actions/workflows/php-tests.yml)
+[![PHP-UNIT](https://github.com/Isaque-Claudino-dos-Santos/merge-array-into-object/actions/workflows/php-tests.yml/badge.svg)](https://github.com/Isaque-Claudino-dos-Santos/merge-array-into-object/actions/workflows/php-tests.yml)
+
+[![PHP-CS-FIXER](https://github.com/Isaque-Claudino-dos-Santos/merge-array-into-object/actions/workflows/php-format.yml/badge.svg)](https://github.com/Isaque-Claudino-dos-Santos/merge-array-into-object/actions/workflows/php-format.yml)
 
 ## Introdução
 
@@ -81,13 +83,16 @@ echo $createUserDTO->postalCode; // 12312311
 
 Perceba que as propriedades `$age` e `$postalcode` não combinam com o que tem dentro da variável `$data` então foi “renomeado” com o atributo `Key`.
 
-> Quando é passado para `Key` o texto `address.postal_code` é referente a estrutura: 
-`{ 
-   ”address”: {
+> Quando é passado para `Key` o texto `address.postal_code` é referente a estrutura:
+> `{
+> ”address”: {
+
       “postal_code”: 12312311
-   }
- }`
-> 
+
+}
+}`
+
+>
 
 ### Executar Função em uma Propriedade com o Atributo `#[Call]`
 
@@ -102,7 +107,7 @@ class MyHelper {
 	{
 		return $value + 1;
 	}
-	
+
 	public function toUpperCase(string $value): string
 	{
 		return strtoupper($value);
@@ -112,10 +117,10 @@ class MyHelper {
 class CreateUserDTO {
 	#[Call(MyHelper::class, 'add')]
 	public readonly int $id;
-	
+
 	#[Call('strtoupper')]
 	public readonly string $firstName;
-	
+
 	#[Call(new MyHelper, 'toUpperCase')]
 	public readonly string $lastName;
 }
