@@ -25,7 +25,11 @@
   "autoload": {
     "psr-4": {
       "ISQ\\MAIO\\": "src/"
-    }
+    },
+    "files": [
+      "src/helpers/string-helpers.php",
+      "src/helpers/array-helpers.php"
+    ]
   },
   "require": {
     "php": ">=8"
