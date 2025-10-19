@@ -25,7 +25,7 @@ class Call
 		if ($isClass || $isObject) {
 			$reflection = new \ReflectionClass($objectOrClassOrFunction);
 
-			if (!$reflection->hasMethod($methodName)) {
+			if (! $reflection->hasMethod($methodName)) {
 				throw new MethodNotExistsException("Method static {$methodName} not found in {$objectOrClassOrFunction}");
 			}
 
