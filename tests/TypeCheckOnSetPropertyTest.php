@@ -28,7 +28,7 @@ class TypeCheckOnSetPropertyTest extends TestCase
 			],
 		];
 
-		$targetResolved = new MergeArrayIntoObject()->merge(new _ExampleCreateCompany(), $data);
+		$targetResolved = MergeArrayIntoObject::getInstance()->merge(new _ExampleCreateCompany(), $data);
 
 		$this->assertEquals('My Corp', $targetResolved->name);
 		$this->assertEquals(1, $targetResolved->user->id);
