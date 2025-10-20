@@ -1,8 +1,8 @@
 # Merge Array Into Object
 
 [![PHP-UNIT](https://github.com/Isaque-Claudino-dos-Santos/merge-array-into-object/actions/workflows/php-tests.yml/badge.svg)](https://github.com/Isaque-Claudino-dos-Santos/merge-array-into-object/actions/workflows/php-tests.yml)
-
 [![PHP-CS-FIXER](https://github.com/Isaque-Claudino-dos-Santos/merge-array-into-object/actions/workflows/php-format.yml/badge.svg)](https://github.com/Isaque-Claudino-dos-Santos/merge-array-into-object/actions/workflows/php-format.yml)
+[![Doc Deploy](https://github.com/Isaque-Claudino-dos-Santos/merge-array-into-object-doc/actions/workflows/deploy.yml/badge.svg)](https://github.com/Isaque-Claudino-dos-Santos/merge-array-into-object-doc/actions/workflows/deploy.yml)
 
 ## Introdução
 
