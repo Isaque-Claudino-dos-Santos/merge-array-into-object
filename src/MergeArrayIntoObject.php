@@ -36,7 +36,6 @@ class MergeArrayIntoObject
 		$key = $property->getName();
 		$keyExistsInData = array_has_key($data, $key);
 		$propertyType = $property->getType();
-		$propertyTypeName = $property->getType()->__toString();
 		$propertyAllowsNull = $propertyType->allowsNull();
 		$hasDefaultValue = $property->hasDefaultValue() || $propertyAllowsNull;
 		$defaultValue = (! $keyExistsInData && $hasDefaultValue) ? $property->getDefaultValue() : null;
@@ -74,11 +73,11 @@ class MergeArrayIntoObject
 			throw new KeyInArrayNotFoundException($key);
 		}
 
-		if (! $propertyAllowsNull && ! str_contains(gettype($value), $propertyTypeName)) {
+		try {
+			$property->setValue($target, $value);
+		} catch (\TypeError $e) {
 			throw new InvalidTypeToSetException($key);
 		}
-
-		$property->setValue($target, $value);
 	}
 
 	/**
