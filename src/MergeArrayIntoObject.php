@@ -36,6 +36,7 @@ class MergeArrayIntoObject
 		$key = $property->getName();
 		$keyExistsInData = array_has_key($data, $key);
 		$propertyType = $property->getType();
+		$propertyTypeName = $propertyType->__toString();
 		$propertyAllowsNull = $propertyType->allowsNull();
 		$hasDefaultValue = $property->hasDefaultValue() || $propertyAllowsNull;
 		$defaultValue = (! $keyExistsInData && $hasDefaultValue) ? $property->getDefaultValue() : null;
@@ -61,6 +62,10 @@ class MergeArrayIntoObject
 			$processor = new ArrayOfProcessor($value);
 			$processor->process($attribute);
 			$value = $processor->getValue() ?? $defaultValue;
+		}
+
+		if (enum_is_backend($propertyTypeName) && (is_int($value) || is_string($value))) {
+			$value = $propertyTypeName::tryFrom($value);
 		}
 
 		foreach ($property->getAttributes(Call::class) as $attribute) {

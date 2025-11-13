@@ -24,10 +24,23 @@ class ArrayOfProcessor extends Processor
 			return;
 		}
 
-		$this->value = array_map(
-			fn ($item) => MergeArrayIntoObject::getInstance()->merge(new $className(), $item),
-			$this->data
-		);
+		if (enum_is_backend($className)) {
+			$enumClass = $className;
+		}
+
+		$valueMapperHandle = function ($item) use ($className, $enumClass) {
+			if (isset($enumClass) && $item instanceof $enumClass) {
+				return $item;
+			}
+
+			if (isset($enumClass)) {
+				return $enumClass::tryFrom($item);
+			}
+
+			return MergeArrayIntoObject::getInstance()->merge(new $className(), $item);
+		};
+
+		$this->value = array_map($valueMapperHandle, $this->data);
 	}
 
 	public function getValue(): mixed

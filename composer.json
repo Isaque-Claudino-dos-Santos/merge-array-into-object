@@ -28,7 +28,9 @@
     },
     "files": [
       "src/helpers/string-helpers.php",
-      "src/helpers/array-helpers.php"
+      "src/helpers/array-helpers.php",
+      "src/helpers/benchmark-helpers.php",
+      "src/helpers/enum-helpers.php"
     ]
   },
   "require": {
